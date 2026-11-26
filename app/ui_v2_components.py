@@ -1,4 +1,4 @@
-"""Visual components and document metadata for the competition demo."""
+"""Visual-only components and document metadata for the local prototype."""
 
 from html import escape
 from pathlib import Path
@@ -70,13 +70,13 @@ def document_metadata(lang):
     </script>""", unsafe_allow_javascript=True)
 
 
-def show_startup(t):
+def show_startup(t, version):
     """Mount the expendable overlay once; CSS always expires it."""
     st.html(
         f'<div class="z-startup" id="z-startup" lang="zh-CN" translate="no"><div class="z-startup-inner">'
         f'<div class="z-icon">{icon("heart", "#73e0cd")}</div><div class="z-startup-brand">知健 · ZhiJian</div>'
         f'<p>{escape(t("让健康评估更简单，让风险解释更清晰", "Simpler health assessment, clearer explanations."))}</p>'
-        f'<small role="status">{escape(t("正在打开竞赛演示版", "Opening the competition demo"))} · ZhiJian 2.0</small>'
+        f'<small role="status">{escape(t("正在加载知健", "Loading ZhiJian"))} · {escape(version)}</small>'
         f'<button type="button" id="z-startup-skip">{escape(t("立即进入", "Enter now"))}</button></div></div>'
         """<script>
           (() => {
@@ -113,15 +113,12 @@ def brand(version, build_id):
 
 
 def hero(t):
-    tag = t("研究原型 · 成人糖代谢风险", "Research prototype · Adult dysglycemia risk")
-    line_one = t("科学认识风险，", "Understand risk.")
-    line_two = t("开启主动健康管理。", "Take an active role in your health.")
-    summary = t("通过两种评估方式了解研究性筛查提示、模型解释与健康管理关注事项。",
-                "Explore research screening prompts, model explanations, and health-management considerations using two assessment modes.")
-    scope = t("仅用于虚构案例演示。尚未完成临床验证。", "Fictional cases only. The prototype has not been clinically validated.")
-    st.html(f'<section class="z-hero"><div><div class="z-meta">{escape(tag)}</div>'
-            f'<h1><span>{escape(line_one)}</span> <span>{escape(line_two)}</span></h1><p>{escape(summary)}</p>'
-            f'<p class="z-caption">{escape(scope)}</p></div>{svg_image(HERO_ART, "z-hero-art")}</section>')
+    line_one = t("成人糖代谢异常风险评估", "Adult dysglycemia risk assessment")
+    line_two = t("与个体化健康管理", "and personalized health management")
+    summary = t("提供简易与综合评估，呈现模型解释、健康管理关注事项和独立安全提醒。",
+                "Quick and comprehensive assessments with model explanations, health-management considerations, and independent safety notices.")
+    st.html(f'<section class="z-hero"><div><h1><span>{escape(line_one)}</span> <span>{escape(line_two)}</span></h1>'
+            f'<p>{escape(summary)}</p></div>{svg_image(HERO_ART, "z-hero-art")}</section>')
 
 
 def step_progress(labels, complete, reviewed):

@@ -24,13 +24,13 @@
 [data-testid="stMain"] [data-testid="stAlert"] p {font-size: 16px; color: inherit;}
 [data-testid="stMain"] [data-testid="stVerticalBlockBorderWrapper"] {min-width: 0;}
 [data-testid="stMain"] [data-stale="true"] {display: none !important;}
-[data-testid="stMain"] [data-testid="stButton"] button {
+[data-testid="stMain"] :is([data-testid="stButton"], [data-testid="stFormSubmitButton"]) button {
   min-height: 44px; border-radius: 11px; font-weight: 650;
 }
-[data-testid="stMain"] [data-testid="stButton"] button p {margin: 0; color: inherit;}
-[data-testid="stMain"] [data-testid="stButton"] button[kind="primary"] {color: white; background: var(--z-action); border-color: var(--z-action);}
-[data-testid="stMain"] [data-testid="stButton"] button[kind="primary"]:hover {background: #085d56; border-color: #085d56;}
-[data-testid="stMain"] [data-testid="stButton"] button[kind="primary"]:disabled {background: #607c7b; border-color: #607c7b;}
+[data-testid="stMain"] :is([data-testid="stButton"], [data-testid="stFormSubmitButton"]) button p {margin: 0; color: inherit;}
+[data-testid="stMain"] button:is([kind="primary"], [kind="primaryFormSubmit"]) {color: white; background: var(--z-action); border-color: var(--z-action);}
+[data-testid="stMain"] button:is([kind="primary"], [kind="primaryFormSubmit"]):hover {background: #085d56; border-color: #085d56;}
+[data-testid="stMain"] button:is([kind="primary"], [kind="primaryFormSubmit"]):disabled {background: #607c7b; border-color: #607c7b;}
 [data-testid="stMain"] [data-testid="stButton"] button[kind="secondary"] {color: var(--z-deep); background: #fff; border: 1px solid var(--z-border);}
 [data-testid="stMain"] [data-testid="stButton"] button[kind="secondary"]:hover {background: var(--z-soft); border-color: #89bbb3;}
 [data-testid="stMain"] :is(button,summary,[role="combobox"]):focus-visible {outline: 2px solid var(--z-action); outline-offset: 2px;}

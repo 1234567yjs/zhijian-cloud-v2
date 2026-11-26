@@ -41,7 +41,7 @@ try:
         raise ValueError("unexpected research-case bundle")
     st.html(f"<style>{ui.CSS.read_text(encoding='utf-8')}</style>")
 except (OSError, ValueError, KeyError, TypeError):
-    st.error("暂时无法打开研究原型。请刷新页面，或联系维护人员。 The research prototype could not open. Refresh or contact the maintainer.")
+    st.error("暂时无法打开知健。请刷新页面或联系维护人员。 ZhiJian could not open. Refresh or contact the maintainer.")
     st.stop()
 
 page = st.session_state.get("z_page", "home")
@@ -69,7 +69,7 @@ def pick(pair):
 ui.document_metadata(lang)
 if "z_startup_shown" not in st.session_state:
     st.session_state["z_startup_shown"] = True
-    ui.show_startup(t)
+    ui.show_startup(t, copy.VERSION)
 if st.session_state.pop("z_scroll", False):
     ui.jump_to_top()
 
@@ -87,20 +87,20 @@ def model_evidence():
                "The historical comparison paired both models on the same 4,648 NHANES 2013–2014 participants. Estimates are unweighted."))
     st.write(t("AUROC：综合 A 为0.76390，简易 B 为0.76499。A−B 为−0.00110（95%区间 −0.00467 至 0.00256）。未观察到综合模型的总体区分增益，也未证明两模型等效。",
                "AUROC was 0.76390 for comprehensive A and 0.76499 for quick B. A−B was −0.00110 (95% interval −0.00467 to 0.00256). The study found no overall discrimination gain and did not establish equivalence."))
-    st.write(t("适用性仍需进一步研究。研究结果不能用于诊断，也未完成中国人群或临床验证。",
-               "Applicability needs further study. The prototype is for research demonstrations and has not been validated clinically or in a Chinese population."))
+    st.write(pick(copy.CLINICAL_LIMITS))
 
 
 def home():
     ui.hero(t)
     ui.title(t("选择评估方式", "Choose an assessment"),
-             t("两个入口平级，可按想了解的信息选择。", "Choose either mode based on the information you want to explore."))
+             t("评估使用预设案例。", "Assessments use preset cases."))
     columns = st.columns(2)
     descriptions = {
         "quick": (t("年龄、身高、体重", "Age, height, and weight"),
-                  t("用较少信息体验研究性筛查。", "Explore research screening with fewer inputs.")),
+                  t("根据年龄与体重指数评估糖代谢异常风险。", "Assess dysglycemia risk using age and body mass index.")),
         "comprehensive": (t("八项模型特征、SHAP解释", "Eight model features and SHAP"),
-                          t("了解更多健康管理关注事项。", "Explore health-management considerations across several domains.")),
+                  t("结合多项健康指标，提供模型解释与健康管理关注事项。",
+                    "Use multiple health measures to view model explanations and health-management considerations.")),
     }
     for col, option in zip(columns, copy.MODES):
         with col, st.container(key=f"z-mode-{option}"):
@@ -108,15 +108,16 @@ def home():
             fields, summary = descriptions[option]
             st.html(f'<div class="z-mode-copy"><div class="z-mode-icon z-icon">{ui.icon(option)}</div>'
                     f'<h3>{escape(name)}</h3><p>{escape(summary)}</p><div class="z-detail">{escape(fields)}</div></div>')
-            st.button(t(f"体验{name}", f"Start {name.lower()}"), key=f"z_home_{option}", type="primary",
+            st.button(t(f"开始{name}", f"Start {name.lower()}"), key=f"z_home_{option}", type="primary",
                       width="stretch", on_click=open_page, args=("assessment", option))
     with st.container(key="z-library"):
         left, right = st.columns([3, 2], vertical_alignment="center")
         with left:
-            ui.title(t("科研演示案例库", "Research demo library"),
-                     t("浏览11个虚构案例，体验不同年龄、资料完整度和安全提示。", "Explore 11 fictional cases covering age, incomplete information, and safety notices."))
+            ui.title(t("案例库", "Case library"),
+                     t("11 个预设案例，涵盖不同年龄、信息完整度与安全提醒。",
+                       "Eleven preset cases covering age, data completeness, and safety notices."))
         with right:
-            st.button(t("打开科研演示", "Open research demo"), key="z_home_library",
+            st.button(t("查看案例", "View cases"), key="z_home_library",
                       width="stretch", on_click=open_page, args=("library",))
     ui.title(t("研究成果", "Research evidence"))
     facts = (
@@ -126,7 +127,7 @@ def home():
     )
     st.html('<div class="z-proof">' + "".join(f"<div><b>{escape(k)}</b><span>{escape(v)}</span></div>"
                                               for k, v in facts) + "</div>")
-    with st.expander(t("查看研究依据与限制", "Research basis and limitations")):
+    with st.expander(t("研究依据与适用范围", "Evidence and applicability")):
         model_evidence()
 
 
@@ -136,15 +137,14 @@ def set_case(widget):
 
 
 def library():
-    st.title(t("科研演示案例库", "Research demo library"))
-    st.info(pick(copy.DEMO_SCOPE))
+    st.title(t("案例库", "Case library"))
+    st.caption(pick(copy.CASE_SCOPE))
     ids = tuple(copy.CASES)
     key = f"z_library_case_{lang}"
     with st.container(key="z-library"):
-        st.selectbox(t("选择虚构案例", "Choose a fictional case"), ids, index=ids.index(case_id),
+        st.selectbox(t("选择案例", "Choose a case"), ids, index=ids.index(case_id),
                      format_func=lambda case: pick(copy.CASES[case]), key=key, on_change=set_case, args=(key,))
-        st.write(t("选择案例后，用下方任一模式查看它在研究原型中的表现。",
-                   "After selecting a case, choose either mode to explore its behavior in the prototype."))
+        st.write(t("选择案例后，可按任一评估方式生成报告。", "Choose an assessment mode after selecting a case."))
         for column, option in zip(st.columns(2), copy.MODES):
             with column:
                 name = pick(copy.MODES[option])
@@ -160,7 +160,7 @@ def navigation(current):
         return
     entries = [(t("返回首页", "Home"), "home")]
     if current != "library":
-        entries.append((t("更换模拟案例", "Change demo case"), "library"))
+        entries.append((t("更换案例", "Change case"), "library"))
     if current == "report":
         entries.append((t("返回信息核对", "Review inputs"), "assessment"))
     with st.container(key=f"z-navigation-{current}"):
@@ -190,7 +190,7 @@ def submit_case(mode, case_id, lang):
 
 def assessment_form():
     st.title(pick(copy.MODES[mode]))
-    st.info(pick(copy.DEMO_SCOPE))
+    st.caption(pick(copy.CASE_SCOPE))
     hold = t("当前案例", "Current case")
     case_label = pick(copy.CASES[case_id])
     st.html(f'<div class="z-context"><small>{escape(hold)}</small><b>{escape(case_label)}</b></div>')
@@ -275,12 +275,12 @@ def assessment_form():
             with left:
                 waist = number(t("腰围（cm）", "Waist circumference (cm)"), case["waist"])
             with right:
-                sex = choice(t("模型所用性别", "Sex used by the model"),
+                sex = choice(t("性别", "Sex"),
                              {None: t("未选择", "Not selected"), 1: t("男", "Male"), 2: t("女", "Female")}, case["sex"])
             with st.expander(t("血压 · 核对前三次读数", "Blood pressure · Check the first three readings"), expanded=True):
                 readings, unit = blood_pressure()
-            st.caption(t("综合模式至少需要两次完整有效的血压读数。这是待医学审定的原型录入要求。",
-                         "Comprehensive assessment needs at least two complete valid readings. This prototype input rule awaits medical review."))
+            st.caption(t("综合评估至少需要两次完整、有效的血压读数。",
+                         "Comprehensive assessment requires at least two complete, valid blood pressure readings."))
         with st.container(key="z-step-lifestyle"):
             st.subheader(f"4 · {labels[3]}")
             smoking = choice(t("吸烟情况", "Smoking status"),
@@ -335,13 +335,13 @@ def safety_block(bp):
                               f"Valid blood pressure reading {order} triggered a measurement-attention notice."))
             st.warning(message)
         if bp.notices:
-            st.write(t("提醒依据本次有效的单次血压读数，原型规则待医学审定。",
-                       "Notices use valid individual blood pressure readings. The prototype rules await medical review."))
+            st.write(t("提醒依据单次有效血压读数。提示规则仍待医学审定。",
+                       "Notices are based on individual valid blood pressure readings. The rules await medical review."))
         elif not bp.used:
             st.info(t("血压未评估。未获得有效血压读数。", "Blood pressure was not assessed. No valid reading was available."))
         else:
-            st.write(t("有效读数未触发原型规则。这不能判断血压是否正常。",
-                       "No valid reading triggered a prototype rule. This does not establish normal blood pressure."))
+            st.write(t("本次有效读数未触发提醒，仍需按正规测量判断血压水平。",
+                       "No valid reading triggered a notice. Blood pressure status still requires standard measurement."))
         for order, code in bp.issues:
             st.write(t(f"第{order}次读数需要核对。", f"Check reading {order}. ") + reason_message(code))
         if bp.provided:
@@ -381,9 +381,11 @@ def report():
         st.rerun()
     result = saved[3]
     assessed = result.status == "result"
-    st.title(t("研究性评估报告", "Research assessment report"))
-    context = f"{pick(copy.CASES[case_id])} · {pick(copy.MODES[mode])}"
-    st.html(f'<div class="z-context"><b>{escape(context)}</b><small>{escape(t("虚构案例", "Fictional case"))}</small></div>')
+    st.title(t("糖代谢风险评估报告", "Dysglycemia risk assessment report"))
+    origin = pick(copy.CASES[case_id])
+    context = f"{origin} · {pick(copy.MODES[mode])}"
+    case_badge = f'<small>{escape(t("预设案例", "Preset case"))}</small>'
+    st.html(f'<div class="z-context"><b>{escape(context)}</b>{case_badge}</div>')
     with st.container(key="z-report"):
         if assessed:
             st.subheader(t("研究性筛查提示：阳性", "Research screening prompt: positive") if result.positive else
@@ -393,6 +395,8 @@ def report():
         else:
             st.subheader(pick(copy.STATES[result.status]))
             st.write(reason_message(result.reason))
+        if result.bmi is not None:
+            st.caption(t("体重指数（BMI）", "Body mass index (BMI)") + f" · {result.bmi:.1f} kg/m²")
         st.write(pick(copy.SAFETY_SCOPE))
         for warning in result.warnings:
             st.warning(input_message(warning, lang))
@@ -402,9 +406,7 @@ def report():
         note = copy.AGE_NOTES.get(result.age_group)
         if note:
             st.write(pick(note))
-        else:
-            st.write(t("本原型尚未完成临床验证，以上内容用于虚构案例演示。",
-                       "This prototype has not been clinically validated. The output is for a fictional demonstration."))
+        st.write(pick(copy.CLINICAL_LIMITS))
     if assessed and mode == "comprehensive" and result.explanation:
         ui.title(t("模型解释 · SHAP", "Model explanation · SHAP"),
                  t("这些因素解释模型为何得到本次结果。贡献不代表病因、干预收益或医学优先级。",
@@ -413,8 +415,8 @@ def report():
                               t("SHAP正负贡献图", "Signed SHAP contribution chart"),
                               t("降低模型输出", "Lowers output"), t("提高模型输出", "Raises output")))
     ui.title(t("健康管理关注事项", "Health-management considerations"),
-             t("根据有效录入资料单独判断。规则待医学审定，内容仅作研究演示。",
-               "These considerations use valid entered information. The rules await medical review."))
+             t("依据已填写的有效指标独立判断。规则仍待医学审定。",
+               "Considerations are assessed separately from model output using valid measurements. The rules await medical review."))
     if result.concerns:
         management_cards(result.concerns)
     else:

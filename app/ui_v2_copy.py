@@ -1,7 +1,7 @@
-"""Bilingual display copy for the competition demo."""
+"""Bilingual display copy for the local research prototype."""
 
-VERSION = "2.0.1"
-BUILD_ID = "task19-cloud-demo-2.0.1"
+VERSION = "2.0.2"
+BUILD_ID = "cloud-competition-2.0.2"
 
 MODES = {
     "quick": ("简易评估", "Quick Assessment"),
@@ -32,33 +32,32 @@ STATES = {
 }
 
 AGE_NOTES = {
-    "20–39": ("历史研究中，两种模型在20–39岁组漏筛较多。因此本原型暂不展示该年龄组的筛查结论。",
-              "Both models missed many cases in the historical 20–39 age group. The prototype withholds screening outcomes for this group."),
-    "40–59": ("40–59岁组仍有漏筛和误报。本页面仅用于科研演示，尚未完成临床验证。",
-              "False negatives and false positives still occurred among adults aged 40–59. This research prototype has not been clinically validated."),
-    "60–79": ("历史研究中，两种模型在60–79岁组报出很多假阳性。因此本原型暂不展示该年龄组的筛查结论。",
-              "Both models produced many false positives in the historical 60–79 age group. The prototype withholds screening outcomes for this group."),
-    "80+": ("历史调查把80岁及以上统一记录为80岁。两种模型在这一组都提示阳性，本原型暂不展示该年龄组的个人评估结论。",
-            "The survey coded all ages 80 and above as 80. Both models flagged everyone in that historical group, so the prototype withholds individual outcomes."),
+    "20–39": ("历史队列中，两种模型在20–39岁组漏筛较多，因此暂不提供该年龄组的个人筛查结论。",
+              "Both models missed many cases among adults aged 20–39 in the historical cohort. Individual screening outcomes are withheld for this group."),
+    "40–59": ("历史队列的40–59岁组仍有漏筛和误报。",
+              "False negatives and false positives still occurred among adults aged 40–59 in the historical cohort."),
+    "60–79": ("历史队列中，两种模型在60–79岁组假阳性较多，因此暂不提供该年龄组的个人筛查结论。",
+              "Both models produced many false positives among adults aged 60–79 in the historical cohort. Individual screening outcomes are withheld for this group."),
+    "80+": ("历史调查将80岁及以上统一记录为80岁。两种模型在该组均提示阳性，因此暂不提供个人筛查结论。",
+            "The survey coded all ages 80 and above as 80. Both models flagged everyone in that historical group, so individual screening outcomes are withheld."),
 }
 
 REASONS = {
-    "age_missing": ("请填写虚构案例的年龄。", "Enter the fictional case’s age."),
-    "diabetes_yes": ("案例已有糖尿病确诊记录，超出本研究原型的筛查范围。",
-                     "The case already has a diabetes diagnosis and is outside the prototype’s screening scope."),
-    "diabetes_unknown": ("案例的既往糖尿病诊断情况不清楚，暂时无法确认是否适用。",
-                         "The case’s diabetes diagnosis history is unknown, so eligibility cannot be confirmed."),
-    "pregnancy_yes": ("案例处于妊娠期，超出本研究原型的筛查范围。",
-                      "The case is pregnant and outside the prototype’s screening scope."),
-    "pregnancy_unknown": ("案例的妊娠情况不清楚，暂时无法确认是否适用。",
-                          "The case’s pregnancy status is unknown, so eligibility cannot be confirmed."),
-    "extended_missing": ("请补齐腰围、模型所用性别和吸烟情况。", "Enter the waist measurement, sex used by the model, and smoking status."),
+    "age_missing": ("请填写年龄。", "Enter an age."),
+    "diabetes_yes": ("既往已确诊糖尿病，超出当前模型的筛查范围。",
+                     "A prior diabetes diagnosis falls outside the current model’s screening scope."),
+    "diabetes_unknown": ("既往糖尿病诊断情况未知，暂无法确认是否适用。",
+                         "Eligibility cannot be confirmed when prior diabetes diagnosis status is unknown."),
+    "pregnancy_yes": ("当前妊娠，超出模型的筛查范围。", "Current pregnancy falls outside the model’s screening scope."),
+    "pregnancy_unknown": ("妊娠状态未知，暂无法确认是否适用。", "Eligibility cannot be confirmed when pregnancy status is unknown."),
+    "extended_missing": ("请补齐腰围、性别和吸烟情况。", "Enter the waist measurement, sex, and smoking status."),
     "bp_quality": ("综合评估需要至少两次完整、有效的血压读数。只有一次时，可查看该次读数的独立安全提醒。",
                    "Comprehensive assessment needs at least two complete, valid blood pressure readings. A single reading can still be checked for a separate safety notice."),
     "bp_incomplete": ("每次血压须填写收缩压和舒张压，或将该次两项都留空。", "Enter both systolic and diastolic values for a reading or leave both blank."),
-    "bp_extra": ("本研究原型使用前三次血压读数。", "The prototype uses the first three blood pressure readings."),
+    "bp_extra": ("评估使用前三次血压读数。", "The assessment uses the first three blood pressure readings."),
     "bp_unit": ("请先确认血压单位为 mmHg。", "Confirm that the blood pressure unit is mmHg."),
-    "system": ("暂时无法完成这次操作。请返回首页重试，或联系原型维护人员。", "This action could not be completed. Return to the home page and try again, or contact the prototype maintainer."),
+    "system": ("暂时无法完成评估，请返回首页重试或联系维护人员。",
+               "The assessment could not be completed. Return to the home page to retry, or contact support."),
     "age_evidence": ("现有证据不足以支持这个年龄组的常规筛查结论。", "Current evidence is insufficient for a routine screening outcome in this age group."),
     "activity_missing": ("请核对五类身体活动。未知或缺失的回答不能按零计算。", "Check all five activity domains. Unknown or missing answers are not counted as zero."),
     "activity_days": ("每周参与天数应为1至7天。", "Enter 1 to 7 days per week."),
@@ -86,7 +85,7 @@ FIELDS = {
 
 FACTORS_EN = {"年龄": "Age", "BMI": "BMI", "腰围": "Waist circumference",
               "收缩压": "Systolic blood pressure", "舒张压": "Diastolic blood pressure",
-              "身体活动": "Physical activity", "性别": "Sex used by the model", "吸烟状态": "Smoking status"}
+              "身体活动": "Physical activity", "性别": "Sex", "吸烟状态": "Smoking status"}
 FACTORS_ZH = {"吸烟状态": "吸烟情况"}
 
 CONCERNS = {
@@ -100,9 +99,10 @@ CONCERN_STATUS = {
     "triggered": ("触发关注", "Attention flagged"),
     "partial": ("部分指标未评估", "Partly assessed"),
     "unassessed": ("未评估", "Not assessed"),
-    "not_triggered": ("原型规则未触发", "Prototype rule not triggered"),
+    "not_triggered": ("未触发提醒", "No notice triggered"),
 }
 
 SAFETY_SCOPE = ("阳性不能确诊，阴性不能排除糖代谢异常。", "A positive screen cannot establish a diagnosis. A negative screen cannot rule out dysglycemia.")
-DEMO_SCOPE = ("竞赛演示 · 仅可选择预设虚构案例，案例资料只读。本演示不收集个人健康信息。",
-              "Competition demo · Preset fictional cases only. Case details are read-only. The demo does not collect personal health information.")
+CLINICAL_LIMITS = ("结果仅供研究参考，不能用于诊断。模型尚未完成中国人群验证或临床验证。",
+                   "Results are for research reference only and cannot be used for diagnosis. The models have not been validated clinically or in a Chinese population.")
+CASE_SCOPE = ("预设案例为虚构资料，只读。", "Preset cases are fictional and read-only.")
