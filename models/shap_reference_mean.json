@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "feature_names": [
+    "num__RIDAGEYR",
+    "num__BMXBMI",
+    "num__BMXWAIST",
+    "num__SBP_mean",
+    "num__DBP_mean",
+    "num__log_MET",
+    "cat__RIAGENDR_1.0",
+    "cat__RIAGENDR_2.0",
+    "cat__smoking_status_0.0",
+    "cat__smoking_status_1.0",
+    "cat__smoking_status_2.0"
+  ],
+  "mean": [
+    -0.09455742626789868,
+    -0.07136246778774852,
+    -0.08621691241429344,
+    -0.24762168744534907,
+    -0.07707436447602165,
+    -0.11983671974747967,
+    0.44,
+    0.56,
+    0.57,
+    0.2,
+    0.23
+  ]
+}

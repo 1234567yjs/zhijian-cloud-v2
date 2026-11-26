@@ -1,0 +1,146 @@
+{
+    "weight_management": {
+        "rule_id": "MGT-WEIGHT-01",
+        "rule_version": "draft-0.1",
+        "applicable_population": "Adults eligible for the ZhiJian research screening prototype",
+        "review_status": "pending_medical_review",
+        "last_reviewed": null,
+        "source_reference": {"zh": "待核查：ADA Standards of Care in Diabetes 2026（现有来源名称，未核对具体条款）", "en": "To verify: ADA Standards of Care in Diabetes 2026 (existing source name; specific provision unverified)"},
+        "trigger_conditions": [
+            {"variable": "BMXBMI", "operator": ">=", "threshold": 25, "unit": " kg/m²", "label": {"zh": "BMI", "en": "BMI"}}
+        ],
+        "name": {
+            "zh": "体重与中心性肥胖管理",
+            "en": "Weight & Central Adiposity Management"
+        },
+        "core_message": {
+            "zh": "当前BMI达到本原型的体重管理关注条件；建议结合专业评估讨论生活方式管理。",
+            "en": "Your BMI meets this prototype's weight-management attention criterion. Discuss lifestyle management with a healthcare professional as appropriate."
+        },
+        "actions": {
+            "zh": [
+                "优先从饮食结构、总能量摄入和规律身体活动三个方面开展体重管理。",
+                "建议采用能够长期坚持的健康饮食方式，避免极端节食或短期快速减重。",
+                "对于超重或肥胖且糖代谢风险较高的人群，可将初始体重减少约5%–7%作为阶段性健康管理目标。"
+            ],
+            "en": [
+                "Prioritize weight management through dietary quality, appropriate energy intake, and regular physical activity.",
+                "Choose a sustainable healthy eating pattern and avoid extreme dieting or rapid short-term weight loss.",
+                "For individuals with overweight or obesity and elevated metabolic risk, an initial weight reduction of approximately 5%–7% may be considered as a staged health-management goal."
+            ]
+        },
+        "source": {
+            "zh": "参考：ADA Standards of Care in Diabetes 2026",
+            "en": "Reference: ADA Standards of Care in Diabetes 2026"
+        }
+    },
+
+    "blood_pressure_management": {
+        "rule_id": "MGT-BP-01",
+        "rule_version": "draft-0.1",
+        "applicable_population": "Adults eligible for the ZhiJian research screening prototype; one entered blood-pressure reading",
+        "review_status": "pending_medical_review",
+        "last_reviewed": null,
+        "source_reference": {"zh": "待核查：2025 AHA/ACC High Blood Pressure Guideline（现有来源名称，未核对具体条款）", "en": "To verify: 2025 AHA/ACC High Blood Pressure Guideline (existing source name; specific provision unverified)"},
+        "trigger_conditions": [
+            {"variable": "SBP_mean", "operator": ">=", "threshold": 130, "unit": " mmHg", "label": {"zh": "收缩压", "en": "Systolic BP"}},
+            {"variable": "DBP_mean", "operator": ">=", "threshold": 80, "unit": " mmHg", "label": {"zh": "舒张压", "en": "Diastolic BP"}}
+        ],
+        "name": {
+            "zh": "血压管理",
+            "en": "Blood Pressure Management"
+        },
+        "core_message": {
+            "zh": "血压升高可能增加整体代谢及心血管健康风险。",
+            "en": "Elevated blood pressure may increase overall metabolic and cardiovascular health risk."
+        },
+        "actions": {
+            "zh": [
+                "建议在安静状态下规范复测血压，并记录多次测量结果。",
+                "关注体重、膳食盐摄入、身体活动、睡眠等可调整健康因素。",
+                "若多次血压仍明显升高，建议咨询医疗专业人员进一步评估。"
+            ],
+            "en": [
+                "Repeat blood pressure measurements under standardized resting conditions and record multiple readings.",
+                "Pay attention to modifiable factors such as body weight, dietary sodium intake, physical activity, and sleep.",
+                "If blood pressure remains elevated on repeated measurements, consider further evaluation by a healthcare professional."
+            ]
+        },
+        "source": {
+            "zh": "参考：2025 AHA/ACC High Blood Pressure Guideline",
+            "en": "Reference: 2025 AHA/ACC High Blood Pressure Guideline"
+        }
+    },
+
+    "physical_activity": {
+        "rule_id": "MGT-ACTIVITY-01",
+        "rule_version": "draft-0.1",
+        "applicable_population": "Adults eligible for the ZhiJian research screening prototype with complete activity answers",
+        "review_status": "pending_medical_review",
+        "last_reviewed": null,
+        "source_reference": {"zh": "待核查：WHO Physical Activity Guidelines / GPAQ（现有来源名称，未核对具体条款）", "en": "To verify: WHO Physical Activity Guidelines / GPAQ (existing source name; specific provision unverified)"},
+        "trigger_conditions": [
+            {"variable": "MET_min_week", "operator": "<", "threshold": 600, "unit": " MET-min/week", "label": {"zh": "身体活动", "en": "Physical activity"}}
+        ],
+        "name": {
+            "zh": "身体活动管理",
+            "en": "Physical Activity Management"
+        },
+        "core_message": {
+            "zh": "身体活动不足是可以通过生活方式调整改善的重要健康因素。",
+            "en": "Insufficient physical activity is an important modifiable health factor."
+        },
+        "actions": {
+            "zh": [
+                "逐步增加日常身体活动，并减少长时间连续久坐。",
+                "可逐渐达到每周至少150分钟中等强度身体活动，或相应等量的高强度活动。",
+                "根据自身情况选择快走、骑行、游泳等更容易长期坚持的活动方式。"
+            ],
+            "en": [
+                "Gradually increase daily physical activity and reduce prolonged uninterrupted sedentary time.",
+                "Work toward at least 150 minutes of moderate-intensity activity per week, or an equivalent amount of vigorous-intensity activity.",
+                "Choose sustainable activities such as brisk walking, cycling, or swimming according to personal ability and preference."
+            ]
+        },
+        "source": {
+            "zh": "参考：WHO Physical Activity Guidelines / GPAQ",
+            "en": "Reference: WHO Physical Activity Guidelines / GPAQ"
+        }
+    },
+
+    "smoking_cessation": {
+        "rule_id": "MGT-SMOKING-01",
+        "rule_version": "draft-0.1",
+        "applicable_population": "Adults eligible for the ZhiJian research screening prototype",
+        "review_status": "pending_medical_review",
+        "last_reviewed": null,
+        "source_reference": {"zh": "待核查：一般预防健康与戒烟指导（现有来源名称，未定位具体文献）", "en": "To verify: general preventive health and smoking-cessation guidance (existing source label; no specific citation)"},
+        "trigger_conditions": [
+            {"variable": "smoking_status", "operator": "==", "threshold": 2, "unit": "", "label": {"zh": "当前吸烟编码", "en": "Current-smoking code"}}
+        ],
+        "name": {
+            "zh": "吸烟管理",
+            "en": "Smoking Management"
+        },
+        "core_message": {
+            "zh": "当前吸烟是重要的可干预健康危险因素。",
+            "en": "Current smoking is an important modifiable health risk factor."
+        },
+        "actions": {
+            "zh": [
+                "建议制定清晰、可执行的戒烟计划。",
+                "尽量减少诱发吸烟的环境和情境暴露，并建立替代行为。",
+                "如自行戒烟困难，可寻求专业戒烟支持或医疗专业人员帮助。"
+            ],
+            "en": [
+                "Develop a clear and achievable smoking-cessation plan.",
+                "Reduce exposure to situations that trigger smoking and establish healthier replacement behaviors.",
+                "If quitting independently is difficult, consider professional smoking-cessation support or guidance from a healthcare professional."
+            ]
+        },
+        "source": {
+            "zh": "参考：一般预防健康与戒烟指导",
+            "en": "Reference: General preventive health and smoking-cessation guidance"
+        }
+    }
+}

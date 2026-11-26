@@ -1,0 +1,27 @@
+{
+  "version": "task16-demo-1",
+  "synthetic_only": true,
+  "defaults": {
+    "age": 48, "height": 168.0, "weight": 74.0, "waist": 86.0,
+    "diabetes": "no", "pregnancy": "not_applicable", "sex": 1, "smoking": 1,
+    "bp": [[126.0, 78.0], [124.0, 76.0], [122.0, 77.0]], "unit": "mmHg", "quick_bp": false,
+    "activity": {
+      "vigorous_work": {"status": "no"}, "moderate_work": {"status": "no"},
+      "transport": {"status": "yes", "days": 3, "minutes": 20.0},
+      "vigorous_recreation": {"status": "no"}, "moderate_recreation": {"status": "yes", "days": 2, "minutes": 25.0}
+    }
+  },
+  "cases": {
+    "ordinary": {"title": ["X · 普通成年案例", "X · Adult example"], "input": {}},
+    "middle": {"title": ["Y · 中年研究评估", "Y · Middle-age research result"], "input": {"age": 52, "height": 170.0, "weight": 72.0, "waist": 84.0, "pregnancy": "no", "sex": 2, "smoking": 0, "bp": [[118.0, 76.0], [120.0, 78.0], [null, null]], "activity": {"transport": {"status": "no"}, "moderate_work": {"status": "yes", "days": 2, "minutes": 20.0}, "moderate_recreation": {"status": "yes", "days": 3, "minutes": 20.0}}}},
+    "young": {"title": ["年轻组 · 漏筛限制", "Younger group · missed cases"], "input": {"age": 28}},
+    "older": {"title": ["高龄组 · 证据不足", "Older group · evidence limits"], "input": {"age": 67}},
+    "topcode": {"title": ["80岁及以上 · 顶码", "80 or older · top coding"], "input": {"age": 85}},
+    "bp_alert": {"title": ["血压提醒 · 单次读数触发", "Blood pressure notice · one reading triggers"], "input": {"bp": [[182.0, 121.0], [126.0, 78.0], [124.0, 77.0]], "quick_bp": true}},
+    "diagnosed": {"title": ["已确诊糖尿病 · 不适用", "Prior diabetes diagnosis · not eligible"], "input": {"diabetes": "yes", "bp": [[182.0, 121.0], [126.0, 78.0], [124.0, 77.0]], "quick_bp": true}},
+    "unknown": {"title": ["适用信息未知 · 不完整", "Unknown eligibility · incomplete"], "input": {"pregnancy": "unknown"}},
+    "single_bp": {"title": ["仅一次血压 · 口径不足", "Single BP reading · protocol differs"], "input": {"bp": [[126.0, 78.0], [null, null], [null, null]], "quick_bp": true}},
+    "bad_bp": {"title": ["读数矛盾 · 仍保留有效提醒", "Contradictory reading · valid reminder retained"], "input": {"bp": [[182.0, 121.0], [80.0, 100.0], [124.0, 77.0]], "quick_bp": true}},
+    "missing": {"title": ["缺必要输入 · 未完成", "Required input missing · incomplete"], "input": {"weight": null}}
+  }
+}
