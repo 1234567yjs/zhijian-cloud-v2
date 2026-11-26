@@ -1,7 +1,7 @@
 """Bilingual display copy for the local research prototype."""
 
-VERSION = "2.0.2"
-BUILD_ID = "cloud-competition-2.0.2"
+VERSION = "2.0.3"
+BUILD_ID = "cloud-competition-2.0.3"
 
 MODES = {
     "quick": ("简易评估", "Quick Assessment"),
@@ -106,3 +106,7 @@ SAFETY_SCOPE = ("阳性不能确诊，阴性不能排除糖代谢异常。", "A 
 CLINICAL_LIMITS = ("结果仅供研究参考，不能用于诊断。模型尚未完成中国人群验证或临床验证。",
                    "Results are for research reference only and cannot be used for diagnosis. The models have not been validated clinically or in a Chinese population.")
 CASE_SCOPE = ("预设案例为虚构资料，只读。", "Preset cases are fictional and read-only.")
+RESEARCH_SCOPE = (
+    "研究原型 · 仅填写虚构资料，请勿输入本人或他人的真实个人健康信息。资料仅保留在当前会话。",
+    "Research prototype · Use fictional data only. Do not enter personal health information about yourself or others. Inputs are kept only for this session.",
+)

@@ -1,4 +1,4 @@
-"""ZhiJian 2.0.1, public competition demo for preset fictional cases."""
+"""ZhiJian 2.0.3 research prototype for fictional assessments."""
 
 from html import escape
 import json
@@ -19,20 +19,37 @@ import ui_v2_components as ui
 import ui_v2_copy as copy
 
 
-st.set_page_config(page_title="知健 2.0 | ZhiJian", page_icon=ui.favicon(), layout="wide")
+st.set_page_config(page_title="知健 2.0.3 | ZhiJian", page_icon=ui.favicon(), layout="wide")
+st.set_option("client.showErrorDetails", "none")
 
 
-def open_page(page, mode=None):
-    st.session_state["z_page"] = page
+def clear_assessment(*, clear_draft=True):
     st.session_state.pop("z_report", None)
+    st.session_state.pop("z_missing_confirmation", None)
+    if clear_draft:
+        st.session_state.pop("z_draft", None)
+        for key in list(st.session_state):
+            if key.startswith("z_input:"):
+                del st.session_state[key]
+
+
+def open_page(page, mode=None, source=None):
+    # Returning from a report to its own form keeps only the current session draft.
+    clear_assessment(clear_draft=source is not None or page != "assessment")
+    st.session_state["z_page"] = page
     if mode is not None:
         st.session_state["z_mode"] = mode
+    if source is not None:
+        st.session_state["z_source"] = source
+        if source == "research":
+            st.session_state.pop("z_case", None)
     st.session_state["z_scroll"] = True
 
 
 def change_language():
     if st.session_state.get("z_page") == "report":
         open_page("assessment")
+    st.session_state.pop("z_report", None)
 
 
 try:
@@ -47,6 +64,7 @@ except (OSError, ValueError, KeyError, TypeError):
 page = st.session_state.get("z_page", "home")
 mode = st.session_state.get("z_mode", "quick")
 case_id = st.session_state.get("z_case", "ordinary")
+research = st.session_state.get("z_source", "research") == "research"
 with st.container(key="z-top"):
     brand_col, lang_col = st.columns([4, 1], vertical_alignment="center")
     with brand_col:
@@ -93,7 +111,7 @@ def model_evidence():
 def home():
     ui.hero(t)
     ui.title(t("选择评估方式", "Choose an assessment"),
-             t("评估使用预设案例。", "Assessments use preset cases."))
+             t("自主评估仅用于虚构资料的自定义模拟。", "Self-assessments are simulations using fictional data only."))
     columns = st.columns(2)
     descriptions = {
         "quick": (t("年龄、身高、体重", "Age, height, and weight"),
@@ -109,11 +127,11 @@ def home():
             st.html(f'<div class="z-mode-copy"><div class="z-mode-icon z-icon">{ui.icon(option)}</div>'
                     f'<h3>{escape(name)}</h3><p>{escape(summary)}</p><div class="z-detail">{escape(fields)}</div></div>')
             st.button(t(f"开始{name}", f"Start {name.lower()}"), key=f"z_home_{option}", type="primary",
-                      width="stretch", on_click=open_page, args=("assessment", option))
+                      width="stretch", on_click=open_page, args=("assessment", option, "research"))
     with st.container(key="z-library"):
         left, right = st.columns([3, 2], vertical_alignment="center")
         with left:
-            ui.title(t("案例库", "Case library"),
+            ui.title(t("科研演示案例库", "Research case library"),
                      t("11 个预设案例，涵盖不同年龄、信息完整度与安全提醒。",
                        "Eleven preset cases covering age, data completeness, and safety notices."))
         with right:
@@ -132,12 +150,12 @@ def home():
 
 
 def set_case(widget):
+    clear_assessment()
     st.session_state["z_case"] = st.session_state[widget]
-    st.session_state.pop("z_report", None)
 
 
 def library():
-    st.title(t("案例库", "Case library"))
+    st.title(t("科研演示案例库", "Research case library"))
     st.caption(pick(copy.CASE_SCOPE))
     ids = tuple(copy.CASES)
     key = f"z_library_case_{lang}"
@@ -149,7 +167,7 @@ def library():
             with column:
                 name = pick(copy.MODES[option])
                 st.button(t(f"用{name}打开", f"Open in {name.lower()}"), key=f"z_library_{option}",
-                          type="primary", width="stretch", on_click=open_page, args=("assessment", option))
+                          type="primary", width="stretch", on_click=open_page, args=("assessment", option, "case"))
     with st.expander(t("查看案例编号与标题", "Case identifiers and titles")):
         st.html('<ul class="z-list">' + "".join(
             f'<li><code>{escape(item[2])}</code> {escape(pick(item))}</li>' for item in copy.CASES.values()) + '</ul>')
@@ -160,7 +178,7 @@ def navigation(current):
         return
     entries = [(t("返回首页", "Home"), "home")]
     if current != "library":
-        entries.append((t("更换案例", "Change case"), "library"))
+        entries.append((t("科研演示案例库", "Research case library") if research else t("更换案例", "Change case"), "library"))
     if current == "report":
         entries.append((t("返回信息核对", "Review inputs"), "assessment"))
     with st.container(key=f"z-navigation-{current}"):
@@ -175,14 +193,46 @@ def preset_case(case_id):
     return {**defaults, **overrides, "activity": {**defaults["activity"], **overrides.get("activity", {})}}
 
 
-def submit_case(mode, case_id, lang):
-    if case_id not in config["cases"] or mode not in copy.MODES or lang not in ("zh", "en"):
-        return
-    # The browser selects an ID. Model and safety inputs only come from the bundled case.
-    case = preset_case(case_id)
-    if mode == "quick" and not case["quick_bp"]:
-        case.update(bp=(), unit="mmHg")
-    result = evaluate(mode, case)
+def submitted_research_inputs(mode, context):
+    # The callback reads live widget values, not the display snapshot or preset cases.
+    def value(field):
+        return st.session_state.get(f"{context}:{field}")
+
+    fields = ("age", "height", "weight", "diabetes", "pregnancy")
+    values = {field: value(field) for field in fields}
+    if mode == "comprehensive":
+        values.update({field: value(field) for field in ("waist", "sex", "smoking", "unit")})
+        values["bp"] = [(value(f"sbp{i}"), value(f"dbp{i}")) for i in (1, 2, 3)]
+        values["activity"] = {}
+        for domain, *_ in ACTIVITY_DOMAINS:
+            status = value(domain)
+            values["activity"][domain] = {
+                "status": status,
+                "days": value(domain + "_days") if status == "yes" else None,
+                "minutes": value(domain + "_minutes") if status == "yes" else None,
+            }
+    return values
+
+
+def submit_assessment(mode, case_id, lang, context):
+    if case_id is None:
+        prefix = f"{context}:"
+        draft = {key.removeprefix(prefix): st.session_state[key] for key in st.session_state if key.startswith(prefix)}
+        if not draft.pop("fictional", False):
+            st.session_state["z_missing_confirmation"] = True
+            return
+        values = submitted_research_inputs(mode, context)
+        for domain, activity in values.get("activity", {}).items():
+            if activity["status"] != "yes":
+                draft.pop(domain + "_days", None)
+                draft.pop(domain + "_minutes", None)
+        st.session_state["z_draft"] = draft
+        st.session_state.pop("z_missing_confirmation", None)
+    else:
+        values = preset_case(case_id)
+        if mode == "quick" and not values["quick_bp"]:
+            values.update(bp=(), unit="mmHg")
+    result = evaluate(mode, values)
     st.session_state["z_report"] = (mode, case_id, lang, result)
     st.session_state["z_page"] = "report"
     st.session_state["z_scroll"] = True
@@ -190,36 +240,54 @@ def submit_case(mode, case_id, lang):
 
 def assessment_form():
     st.title(pick(copy.MODES[mode]))
-    st.caption(pick(copy.CASE_SCOPE))
-    hold = t("当前案例", "Current case")
-    case_label = pick(copy.CASES[case_id])
-    st.html(f'<div class="z-context"><small>{escape(hold)}</small><b>{escape(case_label)}</b></div>')
+    if research:
+        st.markdown(t("**自定义模拟评估**", "**Custom simulation**"))
+    st.caption(pick(copy.RESEARCH_SCOPE if research else copy.CASE_SCOPE))
+    if not research:
+        hold = t("当前案例", "Current case")
+        case_label = pick(copy.CASES[case_id])
+        st.html(f'<div class="z-context"><small>{escape(hold)}</small><b>{escape(case_label)}</b></div>')
     current_mode = tuple(copy.MODES)
     mode_key = f"z_active_mode_{lang}"
 
     def switch_mode():
         st.session_state["z_mode"] = st.session_state[mode_key]
-        st.session_state.pop("z_report", None)
+        clear_assessment()
 
     st.radio(t("切换评估方式", "Switch assessment mode"), current_mode, index=current_mode.index(mode),
              format_func=lambda value: pick(copy.MODES[value]), horizontal=True, key=mode_key, on_change=switch_mode)
 
-    case = preset_case(case_id)
+    if research:
+        with st.form("z_assessment_form", border=False, enter_to_submit=False):
+            assessment_fields()
+    else:
+        assessment_fields()
+
+
+def assessment_fields():
+    case = {"unit": "mmHg", "bp": [(None, None)] * 3, "activity": {}} if research else preset_case(case_id)
+    context = f"z_input:{lang}:{mode}:{'research' if research else case_id}"
+    draft = st.session_state.get("z_draft", {}) if research else {}
     comprehensive = mode == "comprehensive"
     labels = [t("适用人群", "Eligibility"), t("基础信息", "Core information")]
     if comprehensive:
         labels += [t("补充指标", "Additional measurements"), t("活动与吸烟", "Activity and smoking")]
     labels += [t("核对与评估", "Review and assess")]
-    progress = st.empty()
+    progress = st.empty() if not research else None
 
-    def readonly_value(label, text):
-        st.html(f'<div class="z-readonly"><small>{escape(label)}</small><b>{escape(text)}</b></div>')
+    def readonly_value(label, value):
+        st.html(f'<div class="z-readonly"><small>{escape(label)}</small><b>{escape(value)}</b></div>')
 
-    def number(label, initial):
+    def number(label, initial, name, *, step=1.0):
+        if research:
+            return st.number_input(label, value=draft.get(name, initial), step=step, key=f"{context}:{name}")
         readonly_value(label, t("未提供", "Not provided") if initial is None else f"{initial:g}")
         return initial
 
-    def choice(label, options, initial):
+    def choice(label, options, initial, name):
+        if research:
+            return st.selectbox(label, tuple(options), index=list(options).index(draft.get(name, initial)),
+                                format_func=options.get, key=f"{context}:{name}")
         readonly_value(label, options[initial])
         return initial
 
@@ -229,22 +297,22 @@ def assessment_form():
         st.subheader(f"1 · {labels[0]}")
         left, center, right = st.columns(3)
         with left:
-            age = number(t("年龄（岁）", "Age (years)"), case["age"])
+            age = number(t("年龄（岁）", "Age (years)"), case.get("age"), "age", step=1)
         with center:
             diabetes = choice(t("是否曾确诊糖尿病？", "Previously diagnosed with diabetes?"),
-                              answers, case["diabetes"])
+                              answers, case.get("diabetes"), "diabetes")
         with right:
             pregnancy = choice(t("目前是否妊娠？", "Currently pregnant?"),
                                {**answers, "not_applicable": t("不适用", "Not applicable")},
-                               case["pregnancy"])
+                               case.get("pregnancy"), "pregnancy")
     with st.container(key="z-step-core"):
         st.subheader(f"2 · {labels[1]}")
         left, right = st.columns(2)
         with left:
-            height = number(t("身高（cm）", "Height (cm)"), case["height"])
+            height = number(t("身高（cm）", "Height (cm)"), case.get("height"), "height")
         with right:
-            weight = number(t("体重（kg）", "Weight (kg)"), case["weight"])
-        if height is not None and weight is not None and 120 <= height <= 220 and 30 <= weight <= 250:
+            weight = number(t("体重（kg）", "Weight (kg)"), case.get("weight"), "weight")
+        if not research and height is not None and weight is not None and 120 <= height <= 220 and 30 <= weight <= 250:
             st.write(t("按录入值换算的体重指数（BMI）", "Body mass index (BMI)") +
                      f" · {weight / ((height / 100) ** 2):.1f} kg/m²")
 
@@ -252,14 +320,14 @@ def assessment_form():
         st.write(t("每次同时核对收缩压和舒张压；空白读数不计入均值。",
                    "Check both pressures for each reading. Blank readings are left out of the mean."))
         unit = choice(t("读数单位", "Reading units"), {"mmHg": "mmHg", "unknown": t("单位未确认", "Unconfirmed")},
-                      case["unit"])
+                      case["unit"], "unit")
         values = []
         for index, (sbp, dbp) in enumerate(case["bp"], 1):
             left, right = st.columns(2)
             with left:
-                first = number(t(f"第{index}次收缩压（mmHg）", f"Reading {index} systolic (mmHg)"), sbp)
+                first = number(t(f"第{index}次收缩压（mmHg）", f"Reading {index} systolic (mmHg)"), sbp, f"sbp{index}")
             with right:
-                second = number(t(f"第{index}次舒张压（mmHg）", f"Reading {index} diastolic (mmHg)"), dbp)
+                second = number(t(f"第{index}次舒张压（mmHg）", f"Reading {index} diastolic (mmHg)"), dbp, f"dbp{index}")
             values.append((first, second))
         return values, unit
 
@@ -273,10 +341,10 @@ def assessment_form():
             st.subheader(f"3 · {labels[2]}")
             left, right = st.columns(2)
             with left:
-                waist = number(t("腰围（cm）", "Waist circumference (cm)"), case["waist"])
+                waist = number(t("腰围（cm）", "Waist circumference (cm)"), case.get("waist"), "waist")
             with right:
                 sex = choice(t("性别", "Sex"),
-                             {None: t("未选择", "Not selected"), 1: t("男", "Male"), 2: t("女", "Female")}, case["sex"])
+                             {None: t("未选择", "Not selected"), 1: t("男", "Male"), 2: t("女", "Female")}, case.get("sex"), "sex")
             with st.expander(t("血压 · 核对前三次读数", "Blood pressure · Check the first three readings"), expanded=True):
                 readings, unit = blood_pressure()
             st.caption(t("综合评估至少需要两次完整、有效的血压读数。",
@@ -286,22 +354,25 @@ def assessment_form():
             smoking = choice(t("吸烟情况", "Smoking status"),
                              {None: t("未选择", "Not selected"), 0: t("从不吸烟", "Never smoked"),
                               1: t("曾经吸烟", "Former smoker"), 2: t("目前吸烟", "Currently smokes")},
-                             case["smoking"])
+                             case.get("smoking"), "smoking")
             options = {None: t("未选择", "Not selected"), "yes": t("参加", "Yes"), "no": t("不参加", "No"),
                        "unknown": t("不清楚", "Unknown"), "refused": t("不愿回答", "Prefer not to answer")}
-            with st.expander(t("查看五类身体活动", "View all five activity domains")):
+            with st.expander(t("核对五类身体活动", "Check all five activity domains"), expanded=research):
+                if research:
+                    st.caption(t("选择「参加」时填写天数和时长。系统只读取已参加活动的这两项。",
+                                 "Enter days and duration for activities marked Yes. Other entries in those fields are ignored."))
                 for (domain, *_), title in zip(ACTIVITY_DOMAINS, copy.DOMAINS):
-                    initial = case["activity"][domain]
+                    initial = case["activity"].get(domain, {})
                     name = pick(title)
                     left, middle, right = st.columns(3)
                     with left:
-                        status = choice(name, options, initial["status"])
+                        status = choice(name, options, initial.get("status"), domain)
                     days = minutes = None
-                    if status == "yes":
+                    if research or status == "yes":
                         with middle:
-                            days = number(name + t(" · 天／周", " · days/week"), initial.get("days"))
+                            days = number(name + t(" · 天／周", " · days/week"), initial.get("days"), domain + "_days", step=1)
                         with right:
-                            minutes = number(name + t(" · 分钟／日", " · min/day"), initial.get("minutes"))
+                            minutes = number(name + t(" · 分钟／日", " · min/day"), initial.get("minutes"), domain + "_minutes")
                     activity[domain] = {"status": status, "days": days, "minutes": minutes}
         pairs_entered = sum(sbp is not None and dbp is not None for sbp, dbp in readings)
         stage_complete += [waist is not None and sex is not None and unit == "mmHg" and pairs_entered >= 2,
@@ -309,7 +380,7 @@ def assessment_form():
                                (a["status"] == "yes" and a["days"] is not None and a["minutes"] is not None)
                                for a in activity.values())]
     else:
-        if case["quick_bp"]:
+        if case.get("quick_bp", False):
             with st.expander(t("可选血压 · 不进入简易模型", "Optional blood pressure · Separate from the quick model"), expanded=True):
                 readings, unit = blood_pressure()
         else:
@@ -319,9 +390,16 @@ def assessment_form():
         st.subheader(f"{len(labels)} · {labels[-1]}")
         st.write(t("请核对上方资料。是否适用、是否有独立提醒，将在提交后分别判断。",
                    "Check the information above. Eligibility and any separate notices are evaluated after submission."))
-        progress.html(ui.step_progress(labels, stage_complete, False))
-        st.button(t("生成评估报告", "Generate assessment report"), type="primary",
-                  key="z_submit", width="stretch", on_click=submit_case, args=(mode, case_id, lang))
+        if research:
+            st.checkbox(t("确认使用虚构资料", "Confirm use of fictional data"), key=f"{context}:fictional")
+            if st.session_state.get("z_missing_confirmation"):
+                st.warning(t("请先确认使用虚构资料。", "Please confirm use of fictional data first."))
+            st.form_submit_button(t("生成评估报告", "Generate assessment report"), type="primary", key="z_submit",
+                                  width="stretch", on_click=submit_assessment, args=(mode, None, lang, context))
+        else:
+            progress.html(ui.step_progress(labels, stage_complete, False))
+            st.button(t("生成评估报告", "Generate assessment report"), type="primary", key="z_submit",
+                      width="stretch", on_click=submit_assessment, args=(mode, case_id, lang, context))
 
 
 def safety_block(bp):
@@ -376,15 +454,16 @@ def management_cards(concerns):
 
 def report():
     saved = st.session_state.get("z_report")
-    if saved is None or saved[:3] != (mode, case_id, lang):
+    if saved is None or saved[:3] != (mode, None if research else case_id, lang):
         open_page("assessment")
         st.rerun()
     result = saved[3]
     assessed = result.status == "result"
     st.title(t("糖代谢风险评估报告", "Dysglycemia risk assessment report"))
-    origin = pick(copy.CASES[case_id])
+    origin = t("自定义模拟评估", "Custom simulation") if research else pick(copy.CASES[case_id])
     context = f"{origin} · {pick(copy.MODES[mode])}"
-    case_badge = f'<small>{escape(t("预设案例", "Preset case"))}</small>'
+    badge = t("虚构资料", "Fictional data") if research else t("预设案例", "Preset case")
+    case_badge = f'<small>{escape(badge)}</small>'
     st.html(f'<div class="z-context"><b>{escape(context)}</b>{case_badge}</div>')
     with st.container(key="z-report"):
         if assessed:
